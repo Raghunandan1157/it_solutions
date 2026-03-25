@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NLPL IT Support — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app-layout">
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- ═══════ STAFF SIDEBAR ═══════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">💻</div>
+      <span class="sidebar-title">NLPL IT</span>
+      <button class="sidebar-toggle" id="sidebarToggle" title="Collapse sidebar">◀</button>
+    </div>
+
+    <!-- STAFF NAV (hidden for admin) -->
+    <nav class="sidebar-nav" id="staffNav">
+      <div class="nav-section-label">Dashboard</div>
+      <a class="nav-item active" data-tab="inprogress" href="javascript:void(0)">
+        <span class="nav-icon">⏳</span>
+        <span class="nav-label">In Progress</span>
+        <span class="nav-badge" id="navBadgeInProgress">0</span>
+      </a>
+      <a class="nav-item" data-tab="completed" href="javascript:void(0)">
+        <span class="nav-icon">✅</span>
+        <span class="nav-label">Completed</span>
+        <span class="nav-badge" id="navBadgeCompleted">0</span>
+      </a>
+      <div class="divider" style="margin:12px 0"></div>
+      <div class="nav-section-label">Quick Stats</div>
+      <div class="sidebar-stats">
+        <a class="nav-item" data-quickfilter="Software" href="javascript:void(0)">
+          <span class="nav-icon">🖥️</span>
+          <span class="nav-label">Software</span>
+          <span class="nav-badge" id="navBadgeSoftware" style="background:#3b82f6">0</span>
+        </a>
+        <a class="nav-item" data-quickfilter="Hardware" href="javascript:void(0)">
+          <span class="nav-icon">🔧</span>
+          <span class="nav-label">Hardware</span>
+          <span class="nav-badge" id="navBadgeHardware" style="background:#d97706">0</span>
+        </a>
+        <a class="nav-item" data-quickfilter="Both" href="javascript:void(0)">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Both</span>
+          <span class="nav-badge" id="navBadgeBoth" style="background:#0891b2">0</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- ADMIN NAV (hidden for staff) -->
+    <nav class="sidebar-nav hidden" id="adminNav">
+      <div class="nav-section-label">Admin Panel</div>
+      <div class="nav-item active" data-admin-tab="overview" role="button" tabindex="0">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Overview</span>
+      </div>
+      <div class="nav-item" data-admin-tab="reports" role="button" tabindex="0">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Reports</span>
+      </div>
+      <div class="divider" style="margin:12px 0"></div>
+      <div class="nav-section-label">Summary</div>
+      <div class="admin-sidebar-stats" id="adminSidebarStats"></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-details">
+          <div class="user-name" id="userName">Loading...</div>
+          <div class="user-role" id="userRole">—</div>
+          <div class="user-hoco" id="userHoCo" style="font-size:0.68rem;color:#94a3b8;margin-top:1px"></div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">
+        <span>🚪</span>
+        <span class="nav-label">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════ MAIN CONTENT ═══════ -->
+  <div class="main-content">
+    <header class="topbar">
+      <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      <div>
+        <div class="topbar-title" id="topbarTitle">IT Support Dashboard</div>
+        <div class="topbar-subtitle" id="topbarSubtitle">NLPL — Task Management</div>
+      </div>
+      <div class="topbar-actions">
+        <span id="currentDate" style="font-size:0.8rem;color:var(--text-muted)"></span>
+      </div>
+    </header>
+
+    <main class="content-area">
+
+      <!-- ═══════ STAFF VIEW ═══════ -->
+      <div id="staffView">
+        <div class="section-title" id="sectionTitle">⏳ Tasks In Progress</div>
+
+        <div class="completed-filters hidden" id="completedFilters">
+          <div class="active-filter-bar" id="activeFilterBar"></div>
+        </div>
+
+        <div class="task-grid" id="taskGrid">
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>No tasks yet</h3>
+            <p>Click the <strong>+</strong> button to add your first task.</p>
+          </div>
+        </div>
+
+        <div class="completed-table-wrap hidden" id="completedTableWrap">
+          <table class="completed-table" id="completedTable">
+            <thead>
+              <tr>
+                <th>Task ID</th>
+                <th class="th-filterable" data-col="date">Date <span class="th-filter-icon">▼</span></th>
+                <th class="th-filterable" data-col="branch">Branch <span class="th-filter-icon">▼</span></th>
+                <th class="th-filterable" data-col="hoOrCo">HO/CO <span class="th-filter-icon">▼</span></th>
+                <th class="th-filterable" data-col="issueType">Issue Type <span class="th-filter-icon">▼</span></th>
+                <th>Issue</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody id="completedTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════ ADMIN VIEW ═══════ -->
+      <div id="adminView" class="hidden">
+
+        <!-- ADMIN: OVERVIEW -->
+        <div id="adminOverview">
+          <div class="section-title">📊 Staff Overview — Live Status</div>
+
+          <!-- ADMIN STAT CARDS -->
+          <div class="stats-grid" id="adminStatsGrid" style="margin-bottom:24px"></div>
+
+          <!-- USER CARDS -->
+          <div class="section-title">👥 Team Members</div>
+          <div class="admin-user-grid" id="adminUserGrid"></div>
+        </div>
+
+        <!-- ADMIN: REPORTS -->
+        <div id="adminReports" class="hidden">
+          <div class="section-title">📋 Reports</div>
+          <div class="report-topbar">
+            <span class="report-topbar-label">Select Staff Member</span>
+            <button class="btn btn-export-green" id="rptExport">⬇️ Download Excel</button>
+          </div>
+          <div class="staff-selector" id="staffSelector"></div>
+          <div class="report-summary" id="reportSummary"></div>
+          <div class="completed-table-wrap" id="reportTableWrap" style="margin-top:16px">
+            <table class="completed-table">
+              <thead>
+                <tr>
+                  <th>Task ID</th>
+                  <th class="th-filterable" data-rptcol="date">Date <span class="th-filter-icon">▼</span></th>
+                  <th>Created By</th>
+                  <th class="th-filterable" data-rptcol="branch">Branch <span class="th-filter-icon">▼</span></th>
+                  <th>HO/CO</th>
+                  <th class="th-filterable" data-rptcol="issueType">Type <span class="th-filter-icon">▼</span></th>
+                  <th>Issue</th>
+                  <th>Status</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody id="reportTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /adminView -->
+
+    </main>
+  </div>
+</div>
+
+<!-- FAB (staff only) -->
+<button class="fab" id="fab" title="Add new task">+</button>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ───────── WIZARD MODAL ───────── -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal wizard-modal">
+    <div class="modal-header">
+      <span id="modalTitle">➕ New Task</span>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="stepper-bar" id="stepperBar">
+      <div class="stepper-step active" data-step="1"><div class="stepper-circle">1</div><div class="stepper-label">Date & Branch</div></div>
+      <div class="stepper-line"></div>
+      <div class="stepper-step" data-step="2"><div class="stepper-circle">2</div><div class="stepper-label">Issue Type</div></div>
+      <div class="stepper-line"></div>
+      <div class="stepper-step" data-step="3"><div class="stepper-circle">3</div><div class="stepper-label">Issue</div></div>
+      <div class="stepper-line"></div>
+      <div class="stepper-step" data-step="4"><div class="stepper-circle">4</div><div class="stepper-label">Solution</div></div>
+      <div class="stepper-line"></div>
+      <div class="stepper-step" data-step="5"><div class="stepper-circle">5</div><div class="stepper-label">Amount</div></div>
+      <div class="stepper-line"></div>
+      <div class="stepper-step" data-step="6"><div class="stepper-circle">6</div><div class="stepper-label">Review & Save</div></div>
+    </div>
+    <div class="modal-body" id="wizardBody">
+      <div class="wizard-step" id="step1">
+        <h3 class="step-heading">📅 Date, Branch & Staff Details</h3>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Date</label><input class="form-control" type="date" id="fDate" /></div>
+          <div class="form-group"><label class="form-label">Time</label><input class="form-control" type="time" id="fTime" step="1" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Branch <span style="color:var(--danger)">*</span></label><select class="form-control" id="fBranch"><option value="">-- Select Branch --</option></select><span class="form-error" id="errBranch"></span></div>
+        <div class="form-group"><label class="form-label">HO / CO</label><input class="form-control" type="text" id="fHoCo" readonly /><span class="text-muted" style="font-size:0.75rem;margin-top:2px">Auto-assigned based on your login</span></div>
+        <div id="staffSection" class="hidden">
+          <div class="section-title" style="font-size:0.85rem">Staff Details</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Staff Name <span style="color:var(--danger)">*</span></label><input class="form-control" type="text" id="fStaffName" placeholder="Enter staff name" /><span class="form-error" id="errStaffName"></span></div>
+            <div class="form-group"><label class="form-label">Employee ID <span style="color:var(--danger)">*</span></label><input class="form-control" type="text" id="fStaffId" placeholder="Enter employee ID" /><span class="form-error" id="errStaffId"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="wizard-step hidden" id="step2">
+        <h3 class="step-heading">🖥️ Select Issue Type</h3><p class="step-subtext">Click to select. Click again to deselect.</p>
+        <div class="issue-type-boxes"><div class="issue-box" id="boxSoftware" data-type="Software"><div class="issue-box-icon">🖥️</div><div class="issue-box-label">Software</div></div><div class="issue-box" id="boxHardware" data-type="Hardware"><div class="issue-box-icon">🔧</div><div class="issue-box-label">Hardware</div></div></div>
+        <input type="hidden" id="fIssueType" /><span class="form-error" id="errIssueType" style="text-align:center;display:block;margin-top:8px"></span>
+      </div>
+      <div class="wizard-step hidden" id="step3">
+        <h3 class="step-heading">📝 Describe the Issue</h3>
+        <div class="form-group" style="position:relative"><label class="form-label">Issue Description <span style="color:var(--danger)">*</span></label><textarea class="form-control" id="fIssueDesc" placeholder="Start typing the issue…" rows="4" autocomplete="off"></textarea><div class="autocomplete-dropdown hidden" id="issueAutocomplete"></div><span class="form-error" id="errIssueDesc"></span></div>
+      </div>
+      <div class="wizard-step hidden" id="step4">
+        <h3 class="step-heading">💡 Solution & Description</h3>
+        <div class="form-group"><label class="form-label">Solution (max 50 words) <span style="color:var(--danger)">*</span></label><textarea class="form-control" id="fSolution" placeholder="Brief solution…" rows="2" autocomplete="off"></textarea><div class="word-counter"><span id="solutionWordCount">0</span> / 50 words</div><span class="form-error" id="errSolution"></span></div>
+        <div class="form-group"><label class="form-label">Detailed Description (500–1000 words)</label><textarea class="form-control" id="fDetailedDesc" placeholder="Step-by-step details, root cause, notes…" rows="10" autocomplete="off"></textarea><div class="word-counter"><span id="descWordCount">0</span> / 500–1000 words</div><span class="form-error" id="errDetailedDesc"></span></div>
+      </div>
+      <div class="wizard-step hidden" id="step5"><h3 class="step-heading">💰 Amount</h3><div class="form-group"><label class="form-label">Amount (₹)</label><div class="amount-field"><span class="currency-symbol">₹</span><input class="form-control" type="number" id="fAmount" value="0" min="0" step="0.01" /></div></div></div>
+      <div class="wizard-step hidden" id="step6"><h3 class="step-heading">📄 Review & Save</h3><div class="review-summary" id="reviewSummary"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="btnPrev" style="margin-right:auto">← Back</button>
+      <button class="btn btn-secondary" id="btnCancel">Cancel</button>
+      <button class="btn btn-primary" id="btnNext">Next →</button>
+      <button class="btn btn-primary hidden" id="btnSave">💾 Save Task</button>
+      <button class="btn btn-success hidden" id="btnComplete">✅ Task Completed</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW-ONLY SUMMARY MODAL -->
+<div class="modal-overlay" id="viewOverlay">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header"><span id="viewTitle">📄 Task Summary</span><button class="modal-close" id="viewClose">✕</button></div>
+    <div class="modal-body" id="viewBody"></div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="viewDone">Close</button></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="auth.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', {
+    weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
+  });
+</script>
+</body>
+</html>
