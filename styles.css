@@ -832,15 +832,15 @@ select.form-control { cursor: pointer; }
   .login-card { padding: 28px 20px; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .task-grid { grid-template-columns: 1fr; }
-  .modal { max-height: 98vh; border-radius: var(--radius); }
+  .modal { max-height: 98vh; border-radius: var(--radius); margin: 4px; }
   .modal-header, .modal-body, .modal-footer { padding-left: 14px; padding-right: 14px; }
   .modal-footer { gap: 6px; }
   .modal-footer .btn { padding: 8px 12px; font-size: 0.8rem; }
-  .stepper-bar { padding: 12px 8px 8px; gap: 0; }
-  .stepper-step { min-width: 48px; }
-  .stepper-label { font-size: 0.58rem; }
-  .stepper-circle { width: 26px; height: 26px; font-size: 0.72rem; }
-  .stepper-line { min-width: 8px; max-width: 18px; }
+  .stepper-bar { padding: 10px 4px 6px; gap: 0; overflow-x: hidden; }
+  .stepper-step { min-width: unset; flex: 1; }
+  .stepper-label { display: none; }
+  .stepper-circle { width: 28px; height: 28px; font-size: 0.75rem; }
+  .stepper-line { min-width: 10px; max-width: 24px; flex: 0 1 24px; }
   .issue-type-boxes { gap: 12px; }
   .issue-box { width: 130px; height: 110px; }
   .issue-box-icon { font-size: 28px; }
