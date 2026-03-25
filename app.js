@@ -623,13 +623,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Branch → staff dropdown
+  // Only show staff for Head Office / Corporate Office
+  function isHoCo(branch) {
+    return branch === 'Head Office' || branch === 'Corporate Office';
+  }
+
+  // Branch → staff dropdown (only for HO/CO)
   fBranch.addEventListener('change', () => {
-    if (fBranch.value) {
+    if (fBranch.value && isHoCo(fBranch.value)) {
       staffSection.classList.remove('hidden');
       populateStaffDropdown(fBranch.value);
     } else {
       staffSection.classList.add('hidden');
+      fStaffName.value = '';
+      fStaffId.value = '';
     }
   });
 
@@ -739,7 +746,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   edBranch.addEventListener('change', () => {
-    if (edBranch.value) {
+    if (edBranch.value && isHoCo(edBranch.value)) {
+      $('edStaffSection').classList.remove('hidden');
       const emps = getEmployeesByLocation(edBranch.value);
       edStaff.innerHTML = '<option value="">-- Select --</option>';
       emps.forEach(e => {
@@ -748,7 +756,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         edStaff.appendChild(o);
       });
     } else {
+      $('edStaffSection').classList.add('hidden');
       edStaff.innerHTML = '<option value="">-- Select --</option>';
+      edStaff.value = '';
     }
     edEmpId.textContent = '';
   });
@@ -847,7 +857,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function validateEditForm() {
     $('editError').textContent = '';
     if (!edBranch.value) { $('editError').textContent = 'Select a branch.'; return false; }
-    if (!edStaff.value) { $('editError').textContent = 'Select a staff member.'; return false; }
+    if (isHoCo(edBranch.value) && !edStaff.value) { $('editError').textContent = 'Select a staff member.'; return false; }
     if (!edIssueCategory.value) { $('editError').textContent = 'Select an issue category.'; return false; }
     if (edIssueCategory.value === 'Other' && !edIssueDesc.value.trim()) { $('editError').textContent = 'Describe the issue.'; return false; }
     if (!edSolution.value.trim()) { $('editError').textContent = 'Solution is required.'; return false; }
@@ -891,7 +901,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function validateStep(step) {
     clearAllErrors();
-    if (step === 1) { let ok = true; if (!fBranch.value) { setErr('errBranch', 'Select a branch.'); ok = false; } if (fBranch.value && !fStaffName.value) { setErr('errStaffName', 'Select a staff member.'); ok = false; } return ok; }
+    if (step === 1) { let ok = true; if (!fBranch.value) { setErr('errBranch', 'Select a branch.'); ok = false; } if (isHoCo(fBranch.value) && !fStaffName.value) { setErr('errStaffName', 'Select a staff member.'); ok = false; } return ok; }
     if (step === 2) { if (!fIssueType.value) { setErr('errIssueType', 'Select at least one.'); return false; } return true; }
     if (step === 3) { if (!fIssueCategory.value) { setErr('errIssueDesc', 'Select an issue category.'); return false; } if (fIssueCategory.value === 'Other' && !fIssueDesc.value.trim()) { setErr('errIssueDesc', 'Describe the issue.'); return false; } return true; }
     if (step === 4) { if (!fSolution.value.trim()) { setErr('errSolution', 'Required.'); return false; } if (countWords(fSolution.value) > 50) { setErr('errSolution', 'Max 50 words.'); return false; } return true; }
