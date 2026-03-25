@@ -10,16 +10,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const user = Auth.getUser();
   if (!user) return;
 
-  // Fix stale session — look up from source of truth
-  if (!user.hoOrCo) {
-    const knownUser = await Auth.getUserById(user.id);
-    user.hoOrCo = knownUser ? knownUser.hoOrCo : 'CO';
+  // Load branches, employees, and fix stale session — all in parallel
+  const initPromises = [loadBranches(), loadEmployees()];
+  if (!user.hoOrCo) initPromises.push(Auth.getUserById(user.id).then(k => {
+    user.hoOrCo = k ? k.hoOrCo : 'CO';
     localStorage.setItem('nlpl_auth_user', JSON.stringify(user));
-  }
-
-  // Load branches and employees from DB
-  await loadBranches();
-  await loadEmployees();
+  }));
+  await Promise.all(initPromises);
 
   const isAdmin = user.role === 'admin';
 
@@ -83,8 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function renderAdminOverview() {
-      const allTasks = await DataStore.getAll();
-      const stats = await DataStore.getStats();
+      const [allTasks, stats] = await Promise.all([DataStore.getAll(), DataStore.getStats()]);
 
       // Top stat cards (clickable)
       $('adminStatsGrid').innerHTML = `
@@ -598,9 +594,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    await renderAdminOverview();
-    await renderStaffSelector();
-    await renderReport();
+    await Promise.all([renderAdminOverview(), renderStaffSelector().then(() => renderReport())]);
 
     // Refresh periodically
     setInterval(async () => { await renderAdminOverview(); if (adminTab === 'reports') await renderReport(); if (adminTab === 'duration') await renderDuration(); }, 5000);
@@ -1062,7 +1056,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     BRANCHES.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; fBranch.appendChild(o); });
   }
 
-  async function renderAll() { await renderTasks(); await updateNavBadges(); }
+  async function renderAll() { await Promise.all([renderTasks(), updateNavBadges()]); }
   async function updateNavBadges() {
     const s = await DataStore.getStats();
     $('navBadgeInProgress').textContent = s.inProgress; $('navBadgeCompleted').textContent = s.completed;
