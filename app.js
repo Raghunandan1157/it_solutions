@@ -144,11 +144,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Sidebar stats
       $('adminSidebarStats').innerHTML = `
-        <div class="admin-sidebar-stat-row"><span>Total</span><span class="admin-sidebar-stat-val">${stats.total}</span></div>
+        <div class="admin-sidebar-stat-row"><span>📋 Total</span><span class="admin-sidebar-stat-val">${stats.total}</span></div>
         <div class="admin-sidebar-stat-row"><span>⏳ In Progress</span><span class="admin-sidebar-stat-val">${stats.inProgress}</span></div>
         <div class="admin-sidebar-stat-row"><span>✅ Completed</span><span class="admin-sidebar-stat-val">${stats.completed}</span></div>
-        <div class="admin-sidebar-stat-row"><span>🖥️ Software</span><span class="admin-sidebar-stat-val">${stats.software}</span></div>
-        <div class="admin-sidebar-stat-row"><span>🔧 Hardware</span><span class="admin-sidebar-stat-val">${stats.hardware}</span></div>
       `;
     }
 
