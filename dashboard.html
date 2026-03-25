@@ -349,51 +349,53 @@
       <span id="editTitle">✏️ Edit Task</span>
       <button class="modal-close" id="editClose">✕</button>
     </div>
-    <div class="modal-body" id="editBody" style="padding:16px 20px">
-      <div class="edit-sheet">
-        <div class="edit-row">
-          <label class="edit-label">Task ID</label>
-          <div class="edit-value edit-readonly" id="edTaskId"></div>
-        </div>
-        <div class="form-row" style="gap:10px">
-          <div class="edit-row" style="flex:1">
-            <label class="edit-label">Date</label>
-            <input class="form-control form-control-sm" type="date" id="edDate" />
+    <div class="modal-body" id="editBody">
+      <div class="review-summary">
+        <div class="detail-grid">
+          <div class="detail-field">
+            <div class="detail-label">Task ID</div>
+            <div class="detail-value mono" id="edTaskId"></div>
           </div>
-          <div class="edit-row" style="flex:1">
-            <label class="edit-label">Time</label>
-            <input class="form-control form-control-sm" type="time" id="edTime" step="1" />
+          <div class="detail-field">
+            <div class="detail-label">Date & Time</div>
+            <div style="display:flex;gap:8px">
+              <input class="form-control form-control-sm" type="date" id="edDate" style="flex:1" />
+              <input class="form-control form-control-sm" type="time" id="edTime" step="1" style="flex:1" />
+            </div>
           </div>
-        </div>
-        <div class="edit-row">
-          <label class="edit-label">Branch</label>
-          <select class="form-control form-control-sm" id="edBranch"></select>
-        </div>
-        <div class="edit-row">
-          <label class="edit-label">HO / CO</label>
-          <div class="edit-value edit-readonly" id="edHoCo"></div>
-        </div>
-        <div id="edStaffSection" class="hidden">
-          <div class="edit-row">
-            <label class="edit-label">Staff</label>
+          <div class="detail-field">
+            <div class="detail-label">Branch</div>
+            <select class="form-control form-control-sm" id="edBranch"></select>
+          </div>
+          <div class="detail-field">
+            <div class="detail-label">HO / CO</div>
+            <div class="detail-value" id="edHoCo"></div>
+          </div>
+          <div class="detail-field hidden" id="edStaffSection">
+            <div class="detail-label">Staff</div>
             <select class="form-control form-control-sm" id="edStaff"></select>
           </div>
-          <div class="edit-row" style="margin-top:12px">
-            <label class="edit-label">Employee ID</label>
-            <div class="edit-value edit-readonly" id="edEmpId"></div>
+          <div class="detail-field hidden" id="edEmpIdField">
+            <div class="detail-label">Employee ID</div>
+            <div class="detail-value" id="edEmpId"></div>
+          </div>
+          <div class="detail-field">
+            <div class="detail-label">Issue Type</div>
+            <select class="form-control form-control-sm" id="edIssueType">
+              <option value="Software">Software</option>
+              <option value="Hardware">Hardware</option>
+              <option value="Both">Both</option>
+            </select>
+          </div>
+          <div class="detail-field">
+            <div class="detail-label">Amount (₹)</div>
+            <input class="form-control form-control-sm" type="number" id="edAmount" min="0" step="0.01" />
           </div>
         </div>
-        <div class="edit-row">
-          <label class="edit-label">Issue Type</label>
-          <select class="form-control form-control-sm" id="edIssueType">
-            <option value="Software">Software</option>
-            <option value="Hardware">Hardware</option>
-            <option value="Both">Both</option>
-          </select>
-        </div>
-        <div class="edit-row">
-          <label class="edit-label">Issue</label>
-          <select class="form-control form-control-sm" id="edIssueCategory">
+
+        <div style="margin-top:14px">
+          <div class="detail-label">Issue</div>
+          <select class="form-control form-control-sm" id="edIssueCategory" style="margin-top:4px">
             <option value="System Monitor">System Monitor</option>
             <option value="CPU">CPU</option>
             <option value="Printer">Printer</option>
@@ -407,23 +409,21 @@
             <option value="Other">Other</option>
           </select>
         </div>
-        <div class="edit-row hidden" id="edIssueOtherWrap">
-          <label class="edit-label">Issue Detail</label>
-          <textarea class="form-control form-control-sm" id="edIssueDesc" rows="2" placeholder="Describe..."></textarea>
+        <div style="margin-top:10px" class="hidden" id="edIssueOtherWrap">
+          <div class="detail-label">Issue Detail</div>
+          <textarea class="form-control form-control-sm" id="edIssueDesc" rows="2" placeholder="Describe..." style="margin-top:4px"></textarea>
         </div>
-        <div class="edit-row">
-          <label class="edit-label">Solution <span style="color:var(--danger)">*</span></label>
-          <textarea class="form-control form-control-sm" id="edSolution" rows="2"></textarea>
+
+        <div style="margin-top:14px">
+          <div class="detail-label">Solution <span style="color:var(--danger)">*</span></div>
+          <textarea class="form-control form-control-sm" id="edSolution" rows="2" style="margin-top:4px"></textarea>
         </div>
-        <div class="edit-row">
-          <label class="edit-label">Detailed Description <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional)</span></label>
-          <textarea class="form-control form-control-sm" id="edDetailedDesc" rows="5"></textarea>
+        <div style="margin-top:14px">
+          <div class="detail-label">Detailed Description <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional)</span></div>
+          <textarea class="form-control form-control-sm" id="edDetailedDesc" rows="4" style="margin-top:4px"></textarea>
         </div>
-        <div class="edit-row">
-          <label class="edit-label">Amount (₹)</label>
-          <input class="form-control form-control-sm" type="number" id="edAmount" min="0" step="0.01" />
-        </div>
-        <span class="form-error" id="editError"></span>
+
+        <span class="form-error" id="editError" style="margin-top:8px;display:block"></span>
       </div>
     </div>
     <div class="modal-footer">

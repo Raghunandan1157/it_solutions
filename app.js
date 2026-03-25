@@ -748,6 +748,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   edBranch.addEventListener('change', () => {
     if (edBranch.value && isHoCo(edBranch.value)) {
       $('edStaffSection').classList.remove('hidden');
+      $('edEmpIdField').classList.remove('hidden');
       const emps = getEmployeesByLocation(edBranch.value);
       edStaff.innerHTML = '<option value="">-- Select --</option>';
       emps.forEach(e => {
@@ -757,6 +758,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     } else {
       $('edStaffSection').classList.add('hidden');
+      $('edEmpIdField').classList.add('hidden');
       edStaff.innerHTML = '<option value="">-- Select --</option>';
       edStaff.value = '';
     }
