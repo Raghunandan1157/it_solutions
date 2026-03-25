@@ -17,8 +17,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     localStorage.setItem('nlpl_auth_user', JSON.stringify(user));
   }
 
-  // Load branches from DB
+  // Load branches and employees from DB
   await loadBranches();
+  await loadEmployees();
 
   const isAdmin = user.role === 'admin';
 
@@ -377,8 +378,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Branch → staff toggle
-  fBranch.addEventListener('change', () => { staffSection.classList.toggle('hidden', fBranch.value !== 'Head Office (HO)'); });
+  // Branch → staff dropdown
+  fBranch.addEventListener('change', () => {
+    if (fBranch.value) {
+      staffSection.classList.remove('hidden');
+      populateStaffDropdown(fBranch.value);
+    } else {
+      staffSection.classList.add('hidden');
+    }
+  });
+
+  function populateStaffDropdown(location) {
+    const employees = getEmployeesByLocation(location);
+    fStaffName.innerHTML = '<option value="">-- Select Staff --</option>';
+    employees.forEach(e => {
+      const o = document.createElement('option');
+      o.value = e.name;
+      o.textContent = `${e.name} (${e.emp_id})`;
+      o.dataset.empId = e.emp_id;
+      fStaffName.appendChild(o);
+    });
+    fStaffId.value = '';
+  }
+
+  fStaffName.addEventListener('change', () => {
+    const selected = fStaffName.options[fStaffName.selectedIndex];
+    fStaffId.value = selected && selected.dataset.empId ? selected.dataset.empId : '';
+  });
 
   // Issue type boxes
   boxSoftware.addEventListener('click', () => toggleIssueBox('Software'));
@@ -445,7 +471,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (task.timestamp) { const p = task.timestamp.split(' '); if (p[0]) fDate.value = p[0]; if (p[1]) fTime.value = p[1]; }
     fBranch.value = task.branch || ''; fHoCo.value = user.hoOrCo || task.hoOrCo || '';
     fBranch.dispatchEvent(new Event('change'));
-    fStaffName.value = task.staffName || ''; fStaffId.value = task.staffId || '';
+    fStaffName.value = task.staffName || ''; fStaffName.dispatchEvent(new Event('change'));
     state.selectedIssueTypes = task.issueType === 'Both' ? ['Software', 'Hardware'] : task.issueType ? [task.issueType] : [];
     boxSoftware.classList.toggle('selected', state.selectedIssueTypes.includes('Software'));
     boxHardware.classList.toggle('selected', state.selectedIssueTypes.includes('Hardware'));
@@ -468,7 +494,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function validateStep(step) {
     clearAllErrors();
-    if (step === 1) { let ok = true; if (!fBranch.value) { setErr('errBranch', 'Select a branch.'); ok = false; } if (fBranch.value === 'Head Office (HO)') { if (!fStaffName.value.trim()) { setErr('errStaffName', 'Required.'); ok = false; } if (!fStaffId.value.trim()) { setErr('errStaffId', 'Required.'); ok = false; } } return ok; }
+    if (step === 1) { let ok = true; if (!fBranch.value) { setErr('errBranch', 'Select a branch.'); ok = false; } if (fBranch.value && !fStaffName.value) { setErr('errStaffName', 'Select a staff member.'); ok = false; } return ok; }
     if (step === 2) { if (!fIssueType.value) { setErr('errIssueType', 'Select at least one.'); return false; } return true; }
     if (step === 3) { if (!fIssueDesc.value.trim()) { setErr('errIssueDesc', 'Required.'); return false; } return true; }
     if (step === 4) { if (!fSolution.value.trim()) { setErr('errSolution', 'Required.'); return false; } if (countWords(fSolution.value) > 50) { setErr('errSolution', 'Max 50 words.'); return false; } return true; }
@@ -484,7 +510,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div class="detail-field"><div class="detail-label">Date & Time</div><div class="detail-value">${esc(fDate.value)} ${esc(fTime.value)}</div></div>
       <div class="detail-field"><div class="detail-label">Branch</div><div class="detail-value">${esc(fBranch.value)}</div></div>
       <div class="detail-field"><div class="detail-label">HO / CO</div><div class="detail-value">${esc(fHoCo.value)}</div></div>
-      ${fBranch.value === 'Head Office (HO)' ? `<div class="detail-field"><div class="detail-label">Staff</div><div class="detail-value">${esc(fStaffName.value)} (${esc(fStaffId.value)})</div></div>` : ''}
+      ${fStaffName.value ? `<div class="detail-field"><div class="detail-label">Staff</div><div class="detail-value">${esc(fStaffName.value)} (${esc(fStaffId.value)})</div></div>` : ''}
       <div class="detail-field"><div class="detail-label">Issue Type</div><div class="detail-value">${esc(fIssueType.value)}</div></div>
       <div class="detail-field"><div class="detail-label">Amount</div><div class="detail-value">₹${amt.toLocaleString('en-IN')}</div></div>
     </div><div style="margin-top:10px"><div class="detail-label">Issue</div><div class="detail-value" style="margin-top:3px">${esc(fIssueDesc.value)}</div></div>

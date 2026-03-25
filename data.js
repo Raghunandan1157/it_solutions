@@ -1,28 +1,31 @@
 // data.js - Data management module (Supabase backend)
 
-const BRANCHES = []; // loaded from DB via loadBranches()
+const BRANCHES = []; // loaded from employees table (unique locations)
+const EMPLOYEES = []; // loaded from employees table
 
 async function loadBranches() {
   const { data } = await db
-    .from('it_solutions_branches')
-    .select('name')
-    .eq('is_active', true);
+    .from('employees')
+    .select('location');
   BRANCHES.length = 0;
-  if (data) data.forEach(b => BRANCHES.push(b.name));
+  if (data) {
+    const unique = [...new Set(data.map(e => e.location).filter(Boolean))].sort();
+    unique.forEach(b => BRANCHES.push(b));
+  }
 }
 
-const STAFF_LIST = [
-  { id: 'S001', name: 'Arun Kumar' },
-  { id: 'S002', name: 'Priya Nair' },
-  { id: 'S003', name: 'Rahul Sharma' },
-  { id: 'S004', name: 'Sneha Menon' },
-  { id: 'S005', name: 'Vijay Pillai' },
-  { id: 'S006', name: 'Anitha Raj' },
-  { id: 'S007', name: 'Manoj Das' },
-  { id: 'S008', name: 'Divya George' },
-  { id: 'S009', name: 'Suresh Babu' },
-  { id: 'S010', name: 'Lakshmi Iyer' },
-];
+async function loadEmployees() {
+  const { data } = await db
+    .from('employees')
+    .select('emp_id, name, location')
+    .order('name');
+  EMPLOYEES.length = 0;
+  if (data) data.forEach(e => EMPLOYEES.push(e));
+}
+
+function getEmployeesByLocation(location) {
+  return EMPLOYEES.filter(e => e.location === location);
+}
 
 function generateTaskId() {
   const now = new Date();
