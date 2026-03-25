@@ -344,8 +344,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const completedFilters = $('completedFilters'), completedTableWrap = $('completedTableWrap'), completedTableBody = $('completedTableBody');
   const solutionWordCount = $('solutionWordCount'), descWordCount = $('descWordCount');
 
-  let completedColFilters = {};
-  let quickFilterType = null;
+  var completedColFilters = {};
+  var quickFilterType = null;
 
   fHoCo.value = user.hoOrCo;
   populateBranchDropdown();
