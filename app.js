@@ -623,7 +623,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const staffSection = $('staffSection'), fStaffName = $('fStaffName'), fStaffId = $('fStaffId');
   const fIssueType = $('fIssueType'), fIssueCategory = $('fIssueCategory'), fIssueDesc = $('fIssueDesc'), issueOtherWrap = $('issueOtherWrap'), fSolution = $('fSolution');
   const fDetailedDesc = $('fDetailedDesc'), fAmount = $('fAmount');
-  const issueAutocomplete = $('issueAutocomplete'), reviewSummary = $('reviewSummary');
+  const issueAutocomplete = $('issueAutocomplete'); document.body.appendChild(issueAutocomplete);
+  const reviewSummary = $('reviewSummary');
   const boxSoftware = $('boxSoftware'), boxHardware = $('boxHardware');
   const completedFilters = $('completedFilters'), completedTableWrap = $('completedTableWrap'), completedTableBody = $('completedTableBody');
   const solutionWordCount = $('solutionWordCount'), descWordCount = $('descWordCount');
@@ -732,12 +733,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Autocomplete (filtered by selected category)
   issueHistoryCache = [];
 
+  function positionAutocomplete() {
+    const rect = fIssueDesc.getBoundingClientRect();
+    issueAutocomplete.style.left = rect.left + 'px';
+    issueAutocomplete.style.width = rect.width + 'px';
+    // Show above if not enough room below, otherwise below
+    const spaceBelow = window.innerHeight - rect.bottom;
+    if (spaceBelow < 220) {
+      issueAutocomplete.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+      issueAutocomplete.style.top = 'auto';
+    } else {
+      issueAutocomplete.style.top = (rect.bottom + 4) + 'px';
+      issueAutocomplete.style.bottom = 'auto';
+    }
+  }
+
   fIssueDesc.addEventListener('input', () => {
     const val = fIssueDesc.value.trim().toLowerCase();
     if (!val) { issueAutocomplete.classList.add('hidden'); return; }
     const m = issueHistoryCache.filter(h => h.toLowerCase().includes(val));
     if (!m.length) { issueAutocomplete.classList.add('hidden'); return; }
     issueAutocomplete.innerHTML = m.slice(0, 8).map(x => `<div class="autocomplete-item">${esc(x)}</div>`).join('');
+    positionAutocomplete();
     issueAutocomplete.classList.remove('hidden');
     issueAutocomplete.querySelectorAll('.autocomplete-item').forEach(el => { el.addEventListener('click', () => { fIssueDesc.value = el.textContent; issueAutocomplete.classList.add('hidden'); }); });
   });
@@ -971,7 +988,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (step === TOTAL_STEPS) buildReviewSummary();
   }
   function openModal() { modalOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
-  function closeModal() { modalOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+  function closeModal() { modalOverlay.classList.remove('open'); document.body.style.overflow = ''; issueAutocomplete.classList.add('hidden'); }
 
   function validateStep(step) {
     clearAllErrors();

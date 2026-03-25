@@ -1154,17 +1154,14 @@ select.form-control[size] {
 
 /* AUTOCOMPLETE */
 .autocomplete-dropdown {
-  position: absolute;
-  bottom: 100%;
-  left: 0; right: 0;
+  position: fixed;
   background: #ffffff;
   border: 2px solid var(--primary);
   border-radius: 10px;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
-  z-index: 50;
-  max-height: 180px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  z-index: 10000;
+  max-height: 200px;
   overflow-y: auto;
-  margin-bottom: 4px;
   padding: 6px 0;
 }
 .autocomplete-item {
