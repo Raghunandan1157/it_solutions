@@ -717,34 +717,167 @@ document.addEventListener('DOMContentLoaded', async () => {
     const now = new Date(); fDate.value = now.toISOString().split('T')[0]; fTime.value = now.toTimeString().slice(0, 8);
     modalTitle.textContent = '➕ New Task'; goToStep(1); openModal();
   }
-  async function openEditWizard(taskId) {
+  // ─── EDIT SHEET ────────────────────────────────────────────────────────────
+  const editOverlay = $('editOverlay');
+  const edDate = $('edDate'), edTime = $('edTime'), edBranch = $('edBranch');
+  const edStaff = $('edStaff'), edEmpId = $('edEmpId'), edHoCo = $('edHoCo');
+  const edIssueType = $('edIssueType'), edIssueCategory = $('edIssueCategory');
+  const edIssueOtherWrap = $('edIssueOtherWrap'), edIssueDesc = $('edIssueDesc');
+  const edSolution = $('edSolution'), edDetailedDesc = $('edDetailedDesc'), edAmount = $('edAmount');
+  let editingId = null;
+
+  $('editClose').addEventListener('click', closeEdit);
+  $('editCancelBtn').addEventListener('click', closeEdit);
+  editOverlay.addEventListener('click', e => { if (e.target === editOverlay) closeEdit(); });
+
+  function closeEdit() { editOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+
+  // Populate branch dropdown in edit sheet
+  function populateEditBranches() {
+    edBranch.innerHTML = '<option value="">-- Select --</option>';
+    BRANCHES.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; edBranch.appendChild(o); });
+  }
+
+  edBranch.addEventListener('change', () => {
+    if (edBranch.value) {
+      const emps = getEmployeesByLocation(edBranch.value);
+      edStaff.innerHTML = '<option value="">-- Select --</option>';
+      emps.forEach(e => {
+        const o = document.createElement('option');
+        o.value = e.name; o.textContent = `${e.name} (${e.emp_id})`; o.dataset.empId = e.emp_id;
+        edStaff.appendChild(o);
+      });
+    } else {
+      edStaff.innerHTML = '<option value="">-- Select --</option>';
+    }
+    edEmpId.textContent = '';
+  });
+
+  edStaff.addEventListener('change', () => {
+    const sel = edStaff.options[edStaff.selectedIndex];
+    edEmpId.textContent = sel && sel.dataset.empId ? sel.dataset.empId : '';
+  });
+
+  edIssueCategory.addEventListener('change', () => {
+    if (edIssueCategory.value === 'Other') {
+      edIssueOtherWrap.classList.remove('hidden');
+      edIssueDesc.value = '';
+    } else {
+      edIssueOtherWrap.classList.add('hidden');
+      edIssueDesc.value = '';
+    }
+  });
+
+  function parseTimestamp(ts) {
+    if (!ts) return { date: '', time: '' };
+    // Handle ISO format (from Supabase timestamptz) or "YYYY-MM-DD HH:MM:SS"
+    const d = new Date(ts);
+    if (!isNaN(d)) {
+      const pad = n => String(n).padStart(2, '0');
+      return {
+        date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+        time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+      };
+    }
+    const parts = ts.split(' ');
+    return { date: parts[0] || '', time: parts[1] || '' };
+  }
+
+  async function openEditSheet(taskId) {
     const task = await DataStore.getById(taskId); if (!task) return;
-    state.editingTaskId = taskId; resetForm();
-    if (task.timestamp) { const p = task.timestamp.split(' '); if (p[0]) fDate.value = p[0]; if (p[1]) fTime.value = p[1]; }
-    fBranch.value = task.branch || ''; fHoCo.value = user.hoOrCo || task.hoOrCo || '';
-    fBranch.dispatchEvent(new Event('change'));
-    fStaffName.value = task.staffName || ''; fStaffName.dispatchEvent(new Event('change'));
-    state.selectedIssueTypes = task.issueType === 'Both' ? ['Software', 'Hardware'] : task.issueType ? [task.issueType] : [];
-    boxSoftware.classList.toggle('selected', state.selectedIssueTypes.includes('Software'));
-    boxHardware.classList.toggle('selected', state.selectedIssueTypes.includes('Hardware'));
-    fIssueType.value = task.issueType || '';
-    // Set issue category — check if it matches a preset option
+    editingId = taskId;
+
+    $('editTitle').textContent = '✏️ Edit Task #' + task.taskId;
+    $('edTaskId').textContent = task.taskId;
+
+    // Date/time
+    const ts = parseTimestamp(task.timestamp);
+    edDate.value = ts.date;
+    edTime.value = ts.time;
+
+    // Branch + staff
+    populateEditBranches();
+    edBranch.value = task.branch || '';
+    edBranch.dispatchEvent(new Event('change'));
+    edStaff.value = task.staffName || '';
+    edStaff.dispatchEvent(new Event('change'));
+
+    edHoCo.textContent = task.hoOrCo || user.hoOrCo;
+    edIssueType.value = task.issueType || 'Software';
+
+    // Issue category
     const presets = ['System Monitor','CPU','Printer','UPS Invertor','UPS Battery','CCTV Set','Cash Counting Machine','Tab','Bluetooth Printer','Biometric'];
     const issueVal = task.issueDescription || '';
     if (presets.includes(issueVal)) {
-      fIssueCategory.value = issueVal;
-      fIssueDesc.value = issueVal;
-      issueOtherWrap.classList.add('hidden');
+      edIssueCategory.value = issueVal;
+      edIssueOtherWrap.classList.add('hidden');
+      edIssueDesc.value = '';
     } else {
-      fIssueCategory.value = 'Other';
-      fIssueDesc.value = issueVal;
-      issueOtherWrap.classList.remove('hidden');
+      edIssueCategory.value = 'Other';
+      edIssueOtherWrap.classList.remove('hidden');
+      edIssueDesc.value = issueVal;
     }
-    fSolution.value = task.solution || '';
-    fDetailedDesc.value = task.detailedDescription || ''; fAmount.value = task.amount ?? 0;
-    fSolution.dispatchEvent(new Event('input')); fDetailedDesc.dispatchEvent(new Event('input'));
-    modalTitle.textContent = '✏️ Edit Task'; setFormReadonly(false); goToStep(1); openModal();
+
+    edSolution.value = task.solution || '';
+    edDetailedDesc.value = task.detailedDescription || '';
+    edAmount.value = task.amount ?? 0;
+    $('editError').textContent = '';
+
+    editOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
   }
+
+  function getEditFormData() {
+    const issueDesc = edIssueCategory.value === 'Other' ? edIssueDesc.value.trim() : edIssueCategory.value;
+    const staffSel = edStaff.options[edStaff.selectedIndex];
+    return {
+      timestamp: `${edDate.value} ${edTime.value}`,
+      branch: edBranch.value,
+      hoOrCo: edHoCo.textContent,
+      staffName: edStaff.value,
+      staffId: staffSel && staffSel.dataset.empId ? staffSel.dataset.empId : '',
+      issueType: edIssueType.value,
+      issueDescription: issueDesc,
+      solution: edSolution.value.trim(),
+      detailedDescription: edDetailedDesc.value.trim(),
+      amount: parseFloat(edAmount.value) || 0
+    };
+  }
+
+  function validateEditForm() {
+    $('editError').textContent = '';
+    if (!edBranch.value) { $('editError').textContent = 'Select a branch.'; return false; }
+    if (!edStaff.value) { $('editError').textContent = 'Select a staff member.'; return false; }
+    if (!edIssueCategory.value) { $('editError').textContent = 'Select an issue category.'; return false; }
+    if (edIssueCategory.value === 'Other' && !edIssueDesc.value.trim()) { $('editError').textContent = 'Describe the issue.'; return false; }
+    if (!edSolution.value.trim()) { $('editError').textContent = 'Solution is required.'; return false; }
+    return true;
+  }
+
+  $('editSaveBtn').addEventListener('click', async () => {
+    if (!validateEditForm()) return;
+    try {
+      await DataStore.update(editingId, getEditFormData());
+      const desc = getEditFormData().issueDescription;
+      await IssueHistory.save(user.id, desc); issueHistoryCache = await IssueHistory.get(user.id);
+      showToast('Updated.', 'success');
+    } catch (err) { showToast('Error: ' + err.message, 'error'); return; }
+    closeEdit(); await renderAll();
+  });
+
+  $('editCompleteBtn').addEventListener('click', () => {
+    if (!validateEditForm()) return;
+    showConfirm('✅ Complete Task', 'Mark as completed? Cannot be undone.', 'Complete', async () => {
+      try {
+        const updates = getEditFormData();
+        updates.completed = true;
+        updates.completedAt = formatDateTime(new Date());
+        await DataStore.update(editingId, updates);
+        showToast('Completed!', 'success');
+      } catch (err) { showToast('Error: ' + err.message, 'error'); return; }
+      closeEdit(); await renderAll();
+    });
+  });
   function goToStep(step) {
     state.wizardStep = step;
     for (let i = 1; i <= TOTAL_STEPS; i++) { const el = $('step' + i); if (el) el.classList.toggle('hidden', i !== step); }
@@ -902,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (quickFilterType) tasks = tasks.filter(t => t.issueType === quickFilterType);
       if (!tasks.length) { taskGrid.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><h3>No in-progress ${quickFilterType || ''} tasks</h3><p>Click + to add a task.</p></div>`; return; }
       taskGrid.innerHTML = tasks.map(renderTaskCard).join('');
-      taskGrid.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => openEditWizard(b.dataset.edit)));
+      taskGrid.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => openEditSheet(b.dataset.edit)));
       taskGrid.querySelectorAll('[data-complete]').forEach(b => b.addEventListener('click', () => handleQuickComplete(b.dataset.complete)));
     }
   }
@@ -929,7 +1062,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Keyboard: Escape closes modals
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-      if ($('viewOverlay').classList.contains('open')) { $('viewOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+      if ($('editOverlay') && $('editOverlay').classList.contains('open')) { $('editOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+      else if ($('viewOverlay').classList.contains('open')) { $('viewOverlay').classList.remove('open'); document.body.style.overflow = ''; }
       else if ($('modalOverlay').classList.contains('open')) { $('modalOverlay').classList.remove('open'); document.body.style.overflow = ''; }
       const cf = document.querySelector('.confirm-overlay'); if (cf) cf.remove();
     }

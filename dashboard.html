@@ -342,6 +342,96 @@
   </div>
 </div>
 
+<!-- EDIT SHEET MODAL -->
+<div class="modal-overlay" id="editOverlay">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <span id="editTitle">✏️ Edit Task</span>
+      <button class="modal-close" id="editClose">✕</button>
+    </div>
+    <div class="modal-body" id="editBody" style="padding:16px 20px">
+      <div class="edit-sheet">
+        <div class="edit-row">
+          <label class="edit-label">Task ID</label>
+          <div class="edit-value edit-readonly" id="edTaskId"></div>
+        </div>
+        <div class="form-row" style="gap:10px">
+          <div class="edit-row" style="flex:1">
+            <label class="edit-label">Date</label>
+            <input class="form-control form-control-sm" type="date" id="edDate" />
+          </div>
+          <div class="edit-row" style="flex:1">
+            <label class="edit-label">Time</label>
+            <input class="form-control form-control-sm" type="time" id="edTime" step="1" />
+          </div>
+        </div>
+        <div class="edit-row">
+          <label class="edit-label">Branch</label>
+          <select class="form-control form-control-sm" id="edBranch"></select>
+        </div>
+        <div class="edit-row">
+          <label class="edit-label">HO / CO</label>
+          <div class="edit-value edit-readonly" id="edHoCo"></div>
+        </div>
+        <div class="edit-row">
+          <label class="edit-label">Staff</label>
+          <select class="form-control form-control-sm" id="edStaff"></select>
+        </div>
+        <div class="edit-row">
+          <label class="edit-label">Employee ID</label>
+          <div class="edit-value edit-readonly" id="edEmpId"></div>
+        </div>
+        <div class="edit-row">
+          <label class="edit-label">Issue Type</label>
+          <select class="form-control form-control-sm" id="edIssueType">
+            <option value="Software">Software</option>
+            <option value="Hardware">Hardware</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+        <div class="edit-row">
+          <label class="edit-label">Issue</label>
+          <select class="form-control form-control-sm" id="edIssueCategory">
+            <option value="System Monitor">System Monitor</option>
+            <option value="CPU">CPU</option>
+            <option value="Printer">Printer</option>
+            <option value="UPS Invertor">UPS Invertor</option>
+            <option value="UPS Battery">UPS Battery</option>
+            <option value="CCTV Set">CCTV Set</option>
+            <option value="Cash Counting Machine">Cash Counting Machine</option>
+            <option value="Tab">Tab</option>
+            <option value="Bluetooth Printer">Bluetooth Printer</option>
+            <option value="Biometric">Biometric</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="edit-row hidden" id="edIssueOtherWrap">
+          <label class="edit-label">Issue Detail</label>
+          <textarea class="form-control form-control-sm" id="edIssueDesc" rows="2" placeholder="Describe..."></textarea>
+        </div>
+        <div class="edit-row">
+          <label class="edit-label">Solution</label>
+          <textarea class="form-control form-control-sm" id="edSolution" rows="2"></textarea>
+        </div>
+        <div class="edit-row">
+          <label class="edit-label">Detailed Description</label>
+          <textarea class="form-control form-control-sm" id="edDetailedDesc" rows="5"></textarea>
+        </div>
+        <div class="edit-row">
+          <label class="edit-label">Amount (₹)</label>
+          <input class="form-control form-control-sm" type="number" id="edAmount" min="0" step="0.01" />
+        </div>
+        <span class="form-error" id="editError"></span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="editCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="editSaveBtn">💾 Save</button>
+      <button class="btn btn-success" id="editCompleteBtn">✅ Complete</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script src="auth.js"></script>

@@ -1286,6 +1286,34 @@ select.form-control { cursor: pointer; }
 .report-summary-num { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
 .report-summary-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.04em; margin-top: 4px; }
 
+/* ═══ EDIT SHEET ═══ */
+.edit-sheet { display: flex; flex-direction: column; gap: 12px; }
+.edit-row { display: flex; flex-direction: column; gap: 3px; }
+.edit-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+.edit-value { font-size: 0.88rem; color: var(--text); }
+.edit-readonly {
+  font-size: 0.88rem;
+  color: var(--text);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
+.form-control-sm {
+  padding: 7px 10px;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .edit-sheet .form-row { flex-direction: row; }
+}
+
 /* ═══ DURATION — DARK THEME ═══ */
 .dur-dark {
   background: #0c0e1a;
