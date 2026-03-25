@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnPrev = $('btnPrev'), btnNext = $('btnNext'), btnCancel = $('btnCancel'), btnSave = $('btnSave'), btnComplete = $('btnComplete');
   const fDate = $('fDate'), fTime = $('fTime'), fBranch = $('fBranch'), fHoCo = $('fHoCo');
   const staffSection = $('staffSection'), fStaffName = $('fStaffName'), fStaffId = $('fStaffId');
-  const fIssueType = $('fIssueType'), fIssueDesc = $('fIssueDesc'), fSolution = $('fSolution');
+  const fIssueType = $('fIssueType'), fIssueCategory = $('fIssueCategory'), fIssueDesc = $('fIssueDesc'), issueOtherWrap = $('issueOtherWrap'), fSolution = $('fSolution');
   const fDetailedDesc = $('fDetailedDesc'), fAmount = $('fAmount');
   const issueAutocomplete = $('issueAutocomplete'), reviewSummary = $('reviewSummary');
   const boxSoftware = $('boxSoftware'), boxHardware = $('boxHardware');
@@ -664,8 +664,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     else fIssueType.value = '';
   }
 
-  // Autocomplete
-  // Load issue history from DB into cache
+  // Issue category dropdown → show/hide text field
+  fIssueCategory.addEventListener('change', () => {
+    if (fIssueCategory.value === 'Other') {
+      issueOtherWrap.classList.remove('hidden');
+      fIssueDesc.value = '';
+      fIssueDesc.focus();
+    } else {
+      issueOtherWrap.classList.add('hidden');
+      fIssueDesc.value = fIssueCategory.value;
+    }
+  });
+
+  // Autocomplete (for "Other" text field)
   issueHistoryCache = await IssueHistory.get(user.id);
 
   fIssueDesc.addEventListener('input', () => {
@@ -717,7 +728,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     boxSoftware.classList.toggle('selected', state.selectedIssueTypes.includes('Software'));
     boxHardware.classList.toggle('selected', state.selectedIssueTypes.includes('Hardware'));
     fIssueType.value = task.issueType || '';
-    fIssueDesc.value = task.issueDescription || ''; fSolution.value = task.solution || '';
+    // Set issue category — check if it matches a preset option
+    const presets = ['System Monitor','CPU','Printer','UPS Invertor','UPS Battery','CCTV Set','Cash Counting Machine','Tab','Bluetooth Printer','Biometric'];
+    const issueVal = task.issueDescription || '';
+    if (presets.includes(issueVal)) {
+      fIssueCategory.value = issueVal;
+      fIssueDesc.value = issueVal;
+      issueOtherWrap.classList.add('hidden');
+    } else {
+      fIssueCategory.value = 'Other';
+      fIssueDesc.value = issueVal;
+      issueOtherWrap.classList.remove('hidden');
+    }
+    fSolution.value = task.solution || '';
     fDetailedDesc.value = task.detailedDescription || ''; fAmount.value = task.amount ?? 0;
     fSolution.dispatchEvent(new Event('input')); fDetailedDesc.dispatchEvent(new Event('input'));
     modalTitle.textContent = '✏️ Edit Task'; setFormReadonly(false); goToStep(1); openModal();
@@ -737,7 +760,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     clearAllErrors();
     if (step === 1) { let ok = true; if (!fBranch.value) { setErr('errBranch', 'Select a branch.'); ok = false; } if (fBranch.value && !fStaffName.value) { setErr('errStaffName', 'Select a staff member.'); ok = false; } return ok; }
     if (step === 2) { if (!fIssueType.value) { setErr('errIssueType', 'Select at least one.'); return false; } return true; }
-    if (step === 3) { if (!fIssueDesc.value.trim()) { setErr('errIssueDesc', 'Required.'); return false; } return true; }
+    if (step === 3) { if (!fIssueCategory.value) { setErr('errIssueDesc', 'Select an issue category.'); return false; } if (fIssueCategory.value === 'Other' && !fIssueDesc.value.trim()) { setErr('errIssueDesc', 'Describe the issue.'); return false; } return true; }
     if (step === 4) { if (!fSolution.value.trim()) { setErr('errSolution', 'Required.'); return false; } if (countWords(fSolution.value) > 50) { setErr('errSolution', 'Max 50 words.'); return false; } return true; }
     return true;
   }
@@ -781,8 +804,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function resetForm() {
-    [fDate, fTime, fBranch, fStaffName, fStaffId, fIssueType, fIssueDesc, fSolution, fDetailedDesc].forEach(el => { if (el) el.value = ''; });
-    fHoCo.value = user.hoOrCo || 'CO'; fAmount.value = 0; staffSection.classList.add('hidden');
+    [fDate, fTime, fBranch, fStaffName, fStaffId, fIssueType, fIssueCategory, fIssueDesc, fSolution, fDetailedDesc].forEach(el => { if (el) el.value = ''; });
+    fHoCo.value = user.hoOrCo || 'CO'; fAmount.value = 0; staffSection.classList.add('hidden'); issueOtherWrap.classList.add('hidden');
     boxSoftware.classList.remove('selected'); boxHardware.classList.remove('selected');
     state.selectedIssueTypes = []; clearAllErrors();
     if (solutionWordCount) solutionWordCount.textContent = '0'; if (descWordCount) descWordCount.textContent = '0';
