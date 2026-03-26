@@ -887,7 +887,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     edIssueType.value = task.issueType || 'Software';
 
     // Issue category — new format uses issueCategory, old format derives from issueDescription
-    const presets = ['System Monitor','CPU','Printer','UPS Invertor','UPS Battery','CCTV Set','Cash Counting Machine','Tab','Bluetooth Printer','Biometric'];
+    const presets = ['System Monitor','CPU','Printer','UPS Invertor','UPS Battery','CCTV Set','Cash Counting Machine','Tab','Laptop','Bluetooth Printer','Biometric'];
     if (task.issueCategory) {
       edIssueCategory.value = task.issueCategory;
       edIssueDesc.value = task.issueDescription || '';
