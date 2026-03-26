@@ -134,7 +134,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         card.addEventListener('click', async () => {
           reportStatusFilter = card.dataset.status;
           selectedStaffId = '';
-          colFilters.date = ''; colFilters.branch = ''; colFilters.issueType = '';
+          companyFilter = ''; colFilters.date = ''; colFilters.branch = ''; colFilters.issueType = '';
+          document.querySelectorAll('.company-filter-btn').forEach(b => b.classList.toggle('active', !b.dataset.companyFilter));
           document.querySelectorAll('[data-admin-tab]').forEach(n => n.classList.remove('active'));
           document.querySelector('[data-admin-tab="reports"]').classList.add('active');
           adminTab = 'reports';
@@ -205,7 +206,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         row.addEventListener('click', async () => {
           reportStatusFilter = row.dataset.sidebarStatus;
           selectedStaffId = '';
-          colFilters.date = ''; colFilters.branch = ''; colFilters.issueType = '';
+          companyFilter = ''; colFilters.date = ''; colFilters.branch = ''; colFilters.issueType = '';
+          document.querySelectorAll('.company-filter-btn').forEach(b => b.classList.toggle('active', !b.dataset.companyFilter));
           document.querySelectorAll('[data-admin-tab]').forEach(n => n.classList.remove('active'));
           document.querySelector('[data-admin-tab="reports"]').classList.add('active');
           adminTab = 'reports';
@@ -223,7 +225,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ─── REPORTS ──────────────────────────────────────────────────────────────
     let selectedStaffId = '';
     let reportStatusFilter = 'all'; // 'all', 'inprogress', 'completed'
+    let companyFilter = ''; // '', 'NLPL', 'NMSPL'
     const colFilters = { date: '', branch: '', issueType: '' };
+
+    // Company filter buttons
+    document.querySelectorAll('.company-filter-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        document.querySelectorAll('.company-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        companyFilter = btn.dataset.companyFilter;
+        await renderReport();
+      });
+    });
 
     async function renderStaffSelector() {
       const allTasks = await DataStore.getAll();
@@ -269,6 +282,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const u = allUsers.find(x => x.id === selectedStaffId);
         if (u) tasks = tasks.filter(t => t.createdBy === u.name);
       }
+      if (companyFilter === 'NLPL') tasks = tasks.filter(t => BRANCHES.includes(t.branch));
+      else if (companyFilter === 'NMSPL') tasks = tasks.filter(t => NMSPL_BRANCHES.includes(t.branch));
       if (colFilters.date) tasks = tasks.filter(t => t.timestamp && t.timestamp.split(' ')[0] === colFilters.date);
       if (colFilters.branch) tasks = tasks.filter(t => t.branch === colFilters.branch);
       if (colFilters.issueType) tasks = tasks.filter(t => t.issueType === colFilters.issueType);
@@ -346,6 +361,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const u = allUsers.find(x => x.id === selectedStaffId);
         if (u) tasks = tasks.filter(t => t.createdBy === u.name);
       }
+      // Company filter
+      if (companyFilter === 'NLPL') tasks = tasks.filter(t => BRANCHES.includes(t.branch));
+      else if (companyFilter === 'NMSPL') tasks = tasks.filter(t => NMSPL_BRANCHES.includes(t.branch));
+
       // Column header filters
       if (colFilters.date) tasks = tasks.filter(t => t.timestamp && t.timestamp.split(' ')[0] === colFilters.date);
       if (colFilters.branch) tasks = tasks.filter(t => t.branch === colFilters.branch);
